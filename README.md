@@ -1,4 +1,4 @@
-# login_logout_app
+# signup_login_logout_app
 
 A new Flutter project.
 
