@@ -1,17 +1,17 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:login_logout_app/component/button.dart';
-import '../constants.dart';
-import 'Home_Screen.dart';
-import 'Signup_Screen.dart';
 
-class LoginScreen extends StatefulWidget {
+import '../constants.dart';
+import 'Login_Screen.dart';
+
+class SignupScreen extends StatefulWidget {
   @override
-  _LoginScreenState createState() => _LoginScreenState();
+  _SignupScreenState createState() => _SignupScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _SignupScreenState extends State<SignupScreen> {
   final formkey = GlobalKey<FormState>();
   final _auth = FirebaseAuth.instance;
   String email = '';
@@ -21,6 +21,14 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        appBar: AppBar(
+        backgroundColor: Colors.grey[200],
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back_ios, color: Colors.black,size: 30,),
+          onPressed: () => Navigator.of(context).pop(),
+      ),
+    ),
       body: isloading
           ? Center(
         child: CircularProgressIndicator(),
@@ -41,27 +49,28 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(
-                        "Sign In",
-                        style: TextStyle(
-                            fontSize: 50,
-                            color: Colors.black,
-                            fontWeight: FontWeight.bold),
+                      Hero(
+                        tag: '1',
+                        child: Text(
+                          "Sign up",
+                          style: TextStyle(
+                              fontSize: 30,
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold),
+                        ),
                       ),
                       SizedBox(height: 30),
                       TextFormField(
                         keyboardType: TextInputType.emailAddress,
                         onChanged: (value) {
-                          email = value;
+                          email = value.toString().trim();
                         },
-                        validator: (value) {
-                          if (value!.isEmpty) {
-                            return "Please enter Email";
-                          }
-                        },
+                        validator: (value) => (value!.isEmpty)
+                            ? ' Please enter email'
+                            : null,
                         textAlign: TextAlign.center,
                         decoration: kTextFieldDecoration.copyWith(
-                          hintText: 'Email',
+                          hintText: 'Enter Your Email',
                           prefixIcon: Icon(
                             Icons.email,
                             color: Colors.black,
@@ -81,7 +90,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         },
                         textAlign: TextAlign.center,
                         decoration: kTextFieldDecoration.copyWith(
-                            hintText: 'Password',
+                            hintText: 'Choose a Password',
                             prefixIcon: Icon(
                               Icons.lock,
                               color: Colors.black,
@@ -89,21 +98,28 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       SizedBox(height: 80),
                       LoginSignupButton(
-                        title: 'Login',
+                        title: 'Register',
                         ontapp: () async {
                           if (formkey.currentState!.validate()) {
                             setState(() {
                               isloading = true;
                             });
                             try {
-                              await _auth.signInWithEmailAndPassword(
+                              await _auth.createUserWithEmailAndPassword(
                                   email: email, password: password);
 
-                              await Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (contex) => HomeScreen(),
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  backgroundColor: Colors.blueGrey,
+                                  content: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Text(
+                                        'Sucessfully Register.You Can Login Now'),
+                                  ),
+                                  duration: Duration(seconds: 5),
                                 ),
                               );
+                              Navigator.of(context).pop();
 
                               setState(() {
                                 isloading = false;
@@ -112,7 +128,8 @@ class _LoginScreenState extends State<LoginScreen> {
                               showDialog(
                                 context: context,
                                 builder: (ctx) => AlertDialog(
-                                  title: Text("Ops! Login Failed"),
+                                  title:
+                                  Text(' Ops! Registration Failed'),
                                   content: Text('${e.message}'),
                                   actions: [
                                     TextButton(
@@ -124,7 +141,6 @@ class _LoginScreenState extends State<LoginScreen> {
                                   ],
                                 ),
                               );
-                              print(e);
                             }
                             setState(() {
                               isloading = false;
@@ -132,36 +148,6 @@ class _LoginScreenState extends State<LoginScreen> {
                           }
                         },
                       ),
-                      SizedBox(height: 30),
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => SignupScreen(),
-                            ),
-                          );
-                        },
-                        child: Row(
-                          children: [
-                            Text(
-                              "Don't have an Account ?",
-                              style: TextStyle(
-                                  fontSize: 20, color: Colors.black87),
-                            ),
-                            SizedBox(width: 10),
-                            Hero(
-                              tag: '1',
-                              child: Text(
-                                'Sign up',
-                                style: TextStyle(
-                                    fontSize: 21,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black),
-                              ),
-                            )
-                          ],
-                        ),
-                      )
                     ],
                   ),
                 ),
